@@ -2,6 +2,8 @@ package com.example;
 
 import com.sobte.cqp.jcq.entity.*;
 import com.sobte.cqp.jcq.event.JcqAppAbstract;
+import net.pasmc.util.CQManager;
+import net.pasmc.util.MsgManager;
 
 import javax.swing.*;
 
@@ -72,6 +74,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
     public int startup() {
         // 获取应用数据目录(无需储存数据时，请将此行注释)
         String appDirectory = CQ.getAppDirectory();
+        CQManager.onStart(appDirectory);
         // 返回如：D:\CoolQ\app\com.sobte.cqp.jcq\app\com.example.demo\
         // 应用的所有数据、配置【必须】存放于此目录，避免给用户带来困扰。
         return 0;
@@ -85,6 +88,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      * @return 请固定返回0，返回后酷Q将很快关闭，请不要再通过线程等方式执行其他代码。
      */
     public int exit() {
+        CQManager.onExit();
         return 0;
     }
 
@@ -98,6 +102,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      */
     public int enable() {
         enable = true;
+        CQManager.onEnable();
         return 0;
     }
 
@@ -110,6 +115,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      * @return 请固定返回0。
      */
     public int disable() {
+        CQManager.onDisable();
         enable = false;
         return 0;
     }
@@ -130,7 +136,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      */
     public int privateMsg(int subType, int msgId, long fromQQ, String msg, int font) {
         // 这里处理消息
-
+        MsgManager.onPrivateMsgReceived(subType,msgId,fromQQ,msg,font);
         return MSG_IGNORE;
     }
 
@@ -163,6 +169,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         //List<CQImage> images = CC.getCQImages(msg);// 此方法为获取消息中所有的CQ图片数据，错误时打印异常到控制台，返回 已解析的数据
 
         // 这里处理消息
+        MsgManager.onGroupMsgReceived(subType,msgId,fromGroup,fromQQ,fromAnonymous,msg,font);
         return MSG_IGNORE;
     }
 
@@ -180,7 +187,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      */
     public int discussMsg(int subtype, int msgId, long fromDiscuss, long fromQQ, String msg, int font) {
         // 这里处理消息
-
+        MsgManager.onDiscussMsgReceived(subtype,msgId,fromDiscuss,fromQQ,msg,font);
         return MSG_IGNORE;
     }
 
