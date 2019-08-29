@@ -1,4 +1,4 @@
-package net.pasmc.util;
+package cn.charlotte.wolfkills.manager;
 
 import com.sobte.cqp.jcq.entity.IMsg;
 
@@ -36,6 +36,9 @@ public class MsgManager {
      */
 
     public static void onGroupMsgReceived(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font) {
+
+
+
     }
 
     /**
