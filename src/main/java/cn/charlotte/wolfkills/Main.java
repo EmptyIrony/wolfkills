@@ -1,8 +1,8 @@
 package cn.charlotte.wolfkills;
 
+import cn.charlotte.wolfkills.manager.MessageManager;
 import com.sobte.cqp.jcq.entity.*;
 import com.sobte.cqp.jcq.event.JcqAppAbstract;
-import cn.charlotte.wolfkills.manager.MsgManager;
 
 import javax.swing.*;
 
@@ -19,6 +19,8 @@ import javax.swing.*;
  * 具体功能可以查看文档
  */
 public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
+    private MessageManager messageManager;
+
 
     /**
      * 用main方法调试可以最大化的加快开发效率，检测和定位错误位置<br/>
@@ -29,12 +31,12 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
     public static void main(String[] args) {
         // CQ此变量为特殊变量，在JCQ启动时实例化赋值给每个插件，而在测试中可以用CQDebug类来代替他
         CQ = new CQDebug();//new CQDebug("应用目录","应用名称") 可以用此构造器初始化应用的目录
-        CQ.logInfo("[JCQ] TEST Demo", "测试启动");// 现在就可以用CQ变量来执行任何想要的操作了
+        CQ.logInfo("[JCQ] WolfKills", "启动");// 现在就可以用CQ变量来执行任何想要的操作了
         // 要测试主类就先实例化一个主类对象
-        Main demo = new Main();
+        Main main = new Main();
         // 下面对主类进行各方法测试,按照JCQ运行过程，模拟实际情况
-        demo.startup();// 程序运行开始 调用应用初始化方法
-        demo.enable();// 程序初始化完成后，启用应用，让应用正常工作
+        main.startup();// 程序运行开始 调用应用初始化方法
+        main.enable();// 程序初始化完成后，启用应用，让应用正常工作
         // 开始模拟发送消息
         // 模拟私聊消息
         // 开始模拟QQ用户发送消息，以下QQ全部编造，请勿添加
@@ -44,7 +46,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         // 依次类推，可以根据实际情况修改参数，和方法测试效果
         // 以下是收尾触发函数
         // demo.disable();// 实际过程中程序结束不会触发disable，只有用户关闭了此插件才会触发
-        demo.exit();// 最后程序运行结束，调用exit方法
+        main.exit();// 最后程序运行结束，调用exit方法
     }
 
     /**
@@ -131,7 +133,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      */
     public int privateMsg(int subType, int msgId, long fromQQ, String msg, int font) {
         // 这里处理消息
-        MsgManager.onPrivateMsgReceived(subType,msgId,fromQQ,msg,font);
+        messageManager.onPrivateMsg(subType,msgId,fromQQ,msg,font);
         return MSG_IGNORE;
     }
 
@@ -164,7 +166,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         //List<CQImage> images = CC.getCQImages(msg);// 此方法为获取消息中所有的CQ图片数据，错误时打印异常到控制台，返回 已解析的数据
 
         // 这里处理消息
-        MsgManager.onGroupMsgReceived(subType,msgId,fromGroup,fromQQ,fromAnonymous,msg,font);
+        messageManager.onGroupMsg(subType,msgId,fromGroup,fromQQ,fromAnonymous,msg,font);
         return MSG_IGNORE;
     }
 
@@ -182,7 +184,6 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      */
     public int discussMsg(int subtype, int msgId, long fromDiscuss, long fromQQ, String msg, int font) {
         // 这里处理消息
-        MsgManager.onDiscussMsgReceived(subtype,msgId,fromDiscuss,fromQQ,msg,font);
         return MSG_IGNORE;
     }
 
