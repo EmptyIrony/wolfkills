@@ -11,22 +11,19 @@ public class PreStartListener {
     }
 
     void onMessage(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font){
-        Game.gameMap.putIfAbsent(fromGroup,new Game());
-
-        Game game = Game.gameMap.get(fromGroup);
-
-
-
+        Game game = new Game();
+        if(!Game.gameMap.containsKey(fromGroup)){
+            Game.gameMap.put(fromGroup,game);
+        }
 
         if (game.getStatus()== GameStatus.WAITING){
             switch (msg){
                 case "!加入游戏":
-                    //需要判断是否在players里，否则不允许加入
-                game.getPlayers().add(new PlayerData(fromQQ));
-                Main.CQ.sendGroupMsg(fromGroup,Main.CC.at(fromQQ)+" 加入游戏成功！目前人数("+game.getPlayers().size()+"/12)");
-                break;
+                    Main.getPlayerManager().addPlayer(fromQQ,fromGroup,game);
+                    break;
                 case "!退出游戏":
-
+                    Main.getPlayerManager().removePlayer(fromQQ,fromGroup,game);
+                    break;
             }
         }
 
