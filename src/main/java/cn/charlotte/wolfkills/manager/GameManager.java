@@ -244,5 +244,68 @@ public class GameManager {
             message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
         }
         message.append("你要验证身份的是？请直接回复序号 20s");
+
+        try {
+            sleep(20*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        if (game.getNightNum()==1){
+            game.setStatus(GameStatus.PREPOLICE);
+        }else {
+            game.setStatus(GameStatus.MORNING);
+        }
+    }
+
+    public void prePolice(Game game){
+        Main.CQ.sendGroupMsg(game.getGroup(), "天亮了，现在开始警长竞选环节\r\n想要参加竞选的玩家可以私聊发送给我【上警】 20s");
+        try {
+            sleep(20*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        game.setStatus(GameStatus.POLICE);
+    }
+    public void police(Game game){
+        StringBuilder message = new StringBuilder();
+        message.append("上警的玩家有\r\n");
+        //缺少上警list
+
+        message.append("现在从"+""+"号开始发言");
+
+        Main.CQ.sendGroupMsg(game.getGroup(),message.toString());
+    }
+    public void quitPolice(Game game){
+        if (game.getStatus()!=GameStatus.QUITPOLICE){
+            return;
+        }
+
+        StringBuilder message = new StringBuilder();
+        message.append("发言完毕，想要退出竞选的玩家请私聊机器人【退水】 20s");
+        Main.CQ.sendGroupMsg(game.getGroup(),message.toString());
+        try {
+            sleep(20*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void policeVoting(Game game){
+        if (game.getStatus()!=GameStatus.VOTEPOLICE){
+            StringBuilder message = new StringBuilder();
+            message.append("现在警上的玩家还剩\r\n");
+            message.append("警上list");
+            message.append("\r\n请各位玩家投票 20s");
+            Main.CQ.sendGroupMsg(game.getGroup(),message.toString());
+            try{
+                sleep(20*1000);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+            game.setStatus(GameStatus.MORNING);
+        }
     }
 }
