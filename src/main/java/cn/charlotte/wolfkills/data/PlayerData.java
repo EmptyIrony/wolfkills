@@ -11,6 +11,6 @@ public class PlayerData {
     private final long qq;
     private int num;
     private Vocation vocation;
-    private boolean death;
+    private boolean dead;
     private boolean police;
 }

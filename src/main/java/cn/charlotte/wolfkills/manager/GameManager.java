@@ -128,7 +128,49 @@ public class GameManager {
             } catch (InterruptedException ignored) {}
         });
         game.setStatus(GameStatus.WOLFSELECT);
+    }
 
+    public void wolfVoting(Game game) {
+        StringBuilder message = new StringBuilder();
+        message.append("\r\n");
+        for (PlayerData player : game.getPlayers()) {
+            if (player.getVocation() == Vocation.WOLF) {
+                message.append(player.getNum()+". 【狼人】"+Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
+                continue;
+            }
+
+        if (game.getNightNum() == 1) {
+            message.append(player.getNum() + ". 首夜盲杀\r\n");
+            continue;
+        }
+
+        message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
+    }
+       message.append("请直接回复序号进行投票 20s");
+
+        game.getWolfTeam().forEach(playerData -> {
+            Main.CQ.sendPrivateMsg(playerData.getQq(),message.toString());
+            try {
+                sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        try {
+            sleep(20*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        game.setStatus(GameStatus.DEFENDER);
+    }
+
+    public void defendChoosing(Game game){
+        StringBuilder message = new StringBuilder();
+        for (PlayerData player : game.getPlayers()) {
+            if (player.getVocation()==Vocation.DEFENDER){
+                Main.CQ.sendPrivateMsg(player.getQq(),message.toString());
+            }
+        }
 
     }
 }

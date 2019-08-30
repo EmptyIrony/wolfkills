@@ -64,6 +64,13 @@ public class GameRunable implements Runnable {
                     Main.CQ.sendPrivateMsg(data.getQq(),message.toString());
                 }
             });
+            Main.getGameManager().wolfPrivate(game);
+
+            Main.getGameManager().wolfVoting(game);
+
+
+
+
 
 
         }
