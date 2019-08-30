@@ -5,13 +5,22 @@ import cn.charlotte.wolfkills.data.Game;
 import cn.charlotte.wolfkills.data.PlayerData;
 import cn.charlotte.wolfkills.enums.GameStatus;
 import cn.charlotte.wolfkills.enums.Vocation;
+import sun.rmi.runtime.Log;
 
 import java.util.*;
 
 import static java.lang.Thread.sleep;
 
 public class GameManager {
+    private List<Long> voted; //已投票狼人
+    private Map<Long,Integer> wolfVote;
     private PlayerData wolfTalking;
+    private PlayerData temp; //8知道取什么名字帮我改一下 被狼人击杀的玩家
+    private boolean temp2; //守卫是否操作过了
+    private boolean temp3; //女巫是否操作过了
+    private PlayerData temp4; //女巫击杀的玩家'
+    private boolean temp5; //预言家是否操作过了
+    private List<PlayerData> police;
 
     //发送身份
     public void sendVocations(Game game) {
@@ -130,7 +139,17 @@ public class GameManager {
         game.setStatus(GameStatus.WOLFSELECT);
     }
 
+    public void sendWolfPrivateMessage(Game game,PlayerData sender,String msg){
+        for (PlayerData wolf:game.getWolfTeam()){
+            if(!wolf.equals(sender)){
+                Main.CQ.sendPrivateMsg(wolf.getQq(),wolf.getNum() + "号玩家: " + msg);
+            }
+        }
+    }
+
     public void wolfVoting(Game game) {
+        wolfVote = new HashMap<>();
+        voted = new ArrayList<>();
         StringBuilder message = new StringBuilder();
         message.append("\r\n");
         for (PlayerData player : game.getPlayers()) {
@@ -161,6 +180,8 @@ public class GameManager {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        //sleep不知道会不会影响到投票
+        temp = tempfunc(game);
         game.setStatus(GameStatus.DEFENDER);
     }
 
@@ -172,5 +193,77 @@ public class GameManager {
             }
         }
 
+    }
+
+    private PlayerData tempfunc(Game game){ //8知道取什么名字帮我改一下
+        PlayerData temp = null;
+        for (PlayerData playerData:game.getPlayers()){
+            if(wolfVote.containsKey(playerData.getQq())){
+                if(temp == null){
+                    temp = playerData;
+                } else {
+                    if(wolfVote.get(playerData.getQq()) > wolfVote.get(temp.getQq())){
+                        temp = playerData;
+                    }
+                }
+            }
+        }
+        return temp;
+    }
+
+    public PlayerData getWolfTalking() {
+        return wolfTalking;
+    }
+    public Map<Long, Integer> getWolfVote() {
+        return wolfVote;
+    }
+
+    public List<Long> getVoted() {
+        return voted;
+    }
+
+
+    public PlayerData getTemp() {
+        return temp;
+    }
+
+    public boolean getTemp2() {
+        return temp2;
+    }
+
+    public void setTemp2(boolean temp2) {
+        this.temp2 = temp2;
+    }
+
+    public boolean getTemp3() {
+        return temp3;
+    }
+
+    public void setTemp3(boolean temp3) {
+        this.temp3 = temp3;
+    }
+
+    public void setTemp(PlayerData temp) {
+        this.temp = temp;
+    }
+
+    public PlayerData getTemp4() {
+        return temp4;
+    }
+
+    public void setTemp4(PlayerData temp4) {
+        this.temp4 = temp4;
+    }
+
+    public boolean getTemp5() {
+        return temp5;
+    }
+
+    public void setTemp5(boolean temp5) {
+        this.temp5 = temp5;
+    }
+
+    public List<PlayerData> getPolice() {
+        return police;
     }
 }

@@ -10,7 +10,7 @@ public class PreStartListener {
 
     }
 
-    public static void onMessage(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font){
+    public static void onGroupMsg(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font){
         Game game = new Game();
         if(!Game.gameMap.containsKey(fromGroup)){
             Game.gameMap.put(fromGroup,game);
@@ -25,8 +25,8 @@ public class PreStartListener {
                     break;
             }
         }
-
-
     }
+
+
 
 }

@@ -1,4 +1,4 @@
-package cn.charlotte.wolfkills.runnable;
+    package cn.charlotte.wolfkills.runnable;
 
 import cn.charlotte.wolfkills.Main;
 import cn.charlotte.wolfkills.data.Game;
