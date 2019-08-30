@@ -2,7 +2,6 @@ package cn.charlotte.wolfkills.listener;
 
 import cn.charlotte.wolfkills.Main;
 import cn.charlotte.wolfkills.data.Game;
-import cn.charlotte.wolfkills.data.PlayerData;
 import cn.charlotte.wolfkills.enums.GameStatus;
 
 public class PreStartListener {
@@ -16,13 +15,16 @@ public class PreStartListener {
             Game.gameMap.put(fromGroup,game);
         }
         if (game.getStatus()== GameStatus.WAITING){
-            switch (msg){
+            if (fromGroup == 561991434) {
+                switch (msg) {
                 case "!加入游戏":
-                    Main.getPlayerManager().addPlayer(fromQQ,fromGroup,game);
+                    Main.getPlayerManager().addPlayer(fromQQ, fromGroup, game);
                     break;
                 case "!退出游戏":
-                    Main.getPlayerManager().removePlayer(fromQQ,fromGroup,game);
+                    Main.getPlayerManager().removePlayer(fromQQ, fromGroup, game);
                     break;
+
+                }
             }
         }
 

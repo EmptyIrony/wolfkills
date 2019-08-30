@@ -3,8 +3,6 @@ package cn.charlotte.wolfkills.runnable;
 import cn.charlotte.wolfkills.Main;
 import cn.charlotte.wolfkills.data.Game;
 import cn.charlotte.wolfkills.enums.GameStatus;
-import cn.charlotte.wolfkills.enums.Vocation;
-import cn.charlotte.wolfkills.manager.GameManager;
 
 import java.util.Collections;
 
@@ -65,15 +63,17 @@ public class GameRunable implements Runnable {
                     Main.CQ.sendPrivateMsg(data.getQq(),message.toString());
                 }
             });
-            Main.getGameManager().wolfPrivate(game);
-
-            Main.getGameManager().wolfVoting(game);
-
-
-
-
-
-
+            Main.getGameManager().start(game);
         }
+        StringBuilder message = new StringBuilder();
+        message.append("游戏结束！");
+        if (game.getWinner().equalsIgnoreCase("wolf")) {
+            message.append("狼人获胜！");
+        } else {
+            message.append("好人获胜！");
+        }
+
+        Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
+        Main.getMysql().settlement(game);
 }
 }

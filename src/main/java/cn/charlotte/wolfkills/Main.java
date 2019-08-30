@@ -2,6 +2,7 @@ package cn.charlotte.wolfkills;
 
 import cn.charlotte.wolfkills.manager.GameManager;
 import cn.charlotte.wolfkills.manager.MessageManager;
+import cn.charlotte.wolfkills.manager.MysqlManager;
 import cn.charlotte.wolfkills.manager.PlayerManager;
 import com.sobte.cqp.jcq.entity.*;
 import com.sobte.cqp.jcq.event.JcqAppAbstract;
@@ -26,6 +27,8 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
     private static PlayerManager playerManager;
     @Getter
     private static GameManager gameManager;
+    @Getter
+    private static MysqlManager mysql;
 
     /**
      * 用main方法调试可以最大化的加快开发效率，检测和定位错误位置<br/>
@@ -58,6 +61,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         messageManager = new MessageManager();
         playerManager = new PlayerManager();
         gameManager = new GameManager();
+        mysql = new MysqlManager();
     }
 
     public static PlayerManager getPlayerManager() {

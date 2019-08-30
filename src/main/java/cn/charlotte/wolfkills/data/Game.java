@@ -22,12 +22,14 @@ public class Game {
     private List<PlayerData> humanTeam;
     private PlayerData police;
     private String winner;
+    private Map<PlayerData, Integer> vote;
 
     public Game(){
         this.status = GameStatus.WAITING;
         this.players = new ArrayList<>();
         this.wolfTeam = new ArrayList<>();
         this.humanTeam = new ArrayList<>();
+        this.vote = new HashMap<>();
 
     }
 }
