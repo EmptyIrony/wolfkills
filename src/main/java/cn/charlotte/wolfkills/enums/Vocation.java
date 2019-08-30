@@ -3,10 +3,11 @@ package cn.charlotte.wolfkills.enums;
 public enum Vocation {
     VILLAGER,
     DEFENDER,
-    WOLF,
+    WEREWOLF,
     WOLFKING,
     WITCH,
     HUNTER,
     KNIGHT,
-    BEAR
+    BEAR,
+    PROPHET
 }

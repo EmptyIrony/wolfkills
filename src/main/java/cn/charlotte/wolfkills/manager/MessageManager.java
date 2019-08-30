@@ -1,5 +1,6 @@
 package cn.charlotte.wolfkills.manager;
 
+import cn.charlotte.wolfkills.listener.PreStartListener;
 import com.sobte.cqp.jcq.entity.IMsg;
 
 public class MessageManager {
@@ -37,6 +38,6 @@ public class MessageManager {
      */
 
     public void onGroupMsg(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font) {
-
+        PreStartListener.onMessage(subType,msgId,fromGroup,fromQQ,fromAnonymous,msg,font);
     }
 }

@@ -10,12 +10,11 @@ public class PreStartListener {
 
     }
 
-    void onMessage(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font){
+    public static void onMessage(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font){
         Game game = new Game();
         if(!Game.gameMap.containsKey(fromGroup)){
             Game.gameMap.put(fromGroup,game);
         }
-
         if (game.getStatus()== GameStatus.WAITING){
             switch (msg){
                 case "!º”»Î”Œœ∑":
