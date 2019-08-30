@@ -12,5 +12,4 @@ public class PlayerData {
     private int num;
     private Vocation vocation;
     private boolean dead;
-    private boolean police;
 }

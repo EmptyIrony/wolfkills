@@ -40,6 +40,7 @@ public class GameRunable implements Runnable {
         //开始游戏代码段
         Main.CQ.sendGroupMsg(game.getGroup(),"游戏即将开始！正在进行初始化...");
         Collections.shuffle(game.getPlayers());
+        game.setAlivePlayers(game.getPlayers());
         game.setStatus(GameStatus.STARTING);
         Main.getGameManager().sendVocations(game);
         try{

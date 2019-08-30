@@ -14,11 +14,14 @@ public class Game {
 
     private Long group;
     private List<PlayerData> players;
+    private List<PlayerData> alivePlayers;
     private GameStatus status;
     private boolean end;
     private int nightNum;
     private List<PlayerData> wolfTeam;
     private List<PlayerData> humanTeam;
+    private PlayerData police;
+    private String winner;
 
     public Game(){
         this.status = GameStatus.WAITING;

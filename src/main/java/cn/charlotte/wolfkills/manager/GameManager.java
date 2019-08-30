@@ -5,13 +5,16 @@ import cn.charlotte.wolfkills.data.Game;
 import cn.charlotte.wolfkills.data.PlayerData;
 import cn.charlotte.wolfkills.enums.GameStatus;
 import cn.charlotte.wolfkills.enums.Vocation;
+import cn.charlotte.wolfkills.runnable.GameRunable;
+import lombok.Getter;
 
 import java.util.*;
 
 import static java.lang.Thread.sleep;
-
+@Getter
 public class GameManager {
     private PlayerData wolfTalking;
+    private PlayerData saying;
 
     //发送身份
     public void sendVocations(Game game) {
@@ -174,9 +177,10 @@ public class GameManager {
         }
 
         game.setStatus(GameStatus.DEFENDER);
+        defendChoosing(game);
     }
 
-    public void defendChoosing(Game game){
+    private void defendChoosing(Game game){
         if (game.getStatus()!=GameStatus.DEFENDER){
             return;
         }
@@ -200,9 +204,10 @@ public class GameManager {
         }
 
         game.setStatus(GameStatus.WITCH);
+        witchChoosing(game);
     }
 
-    public void witchChoosing(Game game){
+    private void witchChoosing(Game game){
         if (game.getStatus()!=GameStatus.WITCH){
             return;
         }
@@ -229,9 +234,10 @@ public class GameManager {
             e.printStackTrace();
         }
         game.setStatus(GameStatus.PROPHET);
+        prophetChoosing(game);
     }
 
-    public void prophetChoosing(Game game){
+    private void prophetChoosing(Game game){
         if (game.getStatus()!=GameStatus.PROPHET){
             return;
         }
@@ -253,12 +259,13 @@ public class GameManager {
 
         if (game.getNightNum()==1){
             game.setStatus(GameStatus.PREPOLICE);
+            prePolice(game);
         }else {
             game.setStatus(GameStatus.MORNING);
         }
     }
 
-    public void prePolice(Game game){
+    private void prePolice(Game game){
         Main.CQ.sendGroupMsg(game.getGroup(), "天亮了，现在开始警长竞选环节\r\n想要参加竞选的玩家可以私聊发送给我【上警】 20s");
         try {
             sleep(20*1000);
@@ -266,6 +273,7 @@ public class GameManager {
             e.printStackTrace();
         }
         game.setStatus(GameStatus.POLICE);
+        police(game);
     }
     public void police(Game game){
         StringBuilder message = new StringBuilder();
@@ -289,10 +297,11 @@ public class GameManager {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
+        game.setStatus(GameStatus.VOTEPOLICE);
+        policeVoting(game);
     }
 
-    public void policeVoting(Game game){
+    private void policeVoting(Game game){
         if (game.getStatus()!=GameStatus.VOTEPOLICE){
             StringBuilder message = new StringBuilder();
             message.append("现在警上的玩家还剩\r\n");
@@ -308,4 +317,62 @@ public class GameManager {
             game.setStatus(GameStatus.MORNING);
         }
     }
+    private void morning(Game game){
+        StringBuilder message = new StringBuilder();
+        message.append("昨晚，"+""+"号遇害");
+        if (game.getNightNum()==1){
+            message.append(""+"号，请说遗言 120s 结束发言请输入【过】");
+            Main.CQ.sendGroupMsg(game.getGroup(),message.toString());
+
+        }
+        StringBuilder msg = new StringBuilder();
+        if (game.getPolice()!=null){
+            game.setStatus(GameStatus.CHOSINGSAY);
+            msg.append("警长，请决定由警左发言还是警右发言 私聊我【左】或者【右】 20s");
+            Main.CQ.sendGroupMsg(game.getGroup(),msg.toString());
+            try {
+                sleep(20*1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else {
+            PlayerData say = game.getAlivePlayers().get(new Random().nextInt(game.getAlivePlayers().size()));
+            msg.append("没有警长，随机从"+say.getNum()+"号开始发言");
+            saying = say;
+            Main.CQ.sendGroupMsg(game.getGroup(),msg.toString());
+        }
+        game.setStatus(GameStatus.SAY);
+    }
+    private void removePolice(Game game){
+
+
+    }
+
+
+    private boolean isEnd(Game game){
+        int wolfs = 0;
+        int villager = 0;
+        int god = 0;
+
+        for (PlayerData alivePlayer : game.getAlivePlayers()) {
+            if (alivePlayer.getVocation()==Vocation.WOLF){
+                wolfs++;
+            }else if (alivePlayer.getVocation()==Vocation.VILLAGER){
+                villager++;
+            }else {
+                god++;
+            }
+
+        }
+
+        if (wolfs>=(god+villager)||villager==0||god==0){
+            game.setWinner("wolf");
+            return true;
+        }else if (wolfs==0){
+            game.setWinner("human");
+            return true;
+        }
+        return false;
+    }
+
 }
