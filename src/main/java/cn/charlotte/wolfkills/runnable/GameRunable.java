@@ -64,6 +64,14 @@ public class GameRunable implements Runnable {
                 }
             });
             Main.getGameManager().start(game);
+            Main.CQ.logInfo("[Debug]", "完成一次循环");
+            while (!Main.getGameManager().isEnd()) {
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
         StringBuilder message = new StringBuilder();
         message.append("游戏结束！");

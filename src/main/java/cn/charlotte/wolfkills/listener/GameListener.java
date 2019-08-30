@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class GameListener {
+    private static int defendedNum;
 
 
     public static void onPrivateMsg(int subType, int msgId, long fromQQ, String msg, int font) {
@@ -20,21 +21,34 @@ public class GameListener {
                 if (playerData.getQq() == fromQQ) {
                     switch (game.getStatus()) {
                         case DEFENDER:
-                            if (playerData.isDead()) {
+                            if (!playerData.isDead()) {
+                                Main.CQ.logInfo("[Debug]", "该玩家未死");
                                 if (playerData.getVocation().equals(Vocation.DEFENDER)) {
-                                    if (!Main.getGameManager().getTemp2()) {
+                                    Main.CQ.logInfo("[Debug]", "该玩家为守卫");
+                                    if (!Main.getGameManager().getDefenderUsed()) {
+                                        Main.CQ.logInfo("[Debug]", "该玩家守卫未使用");
                                         if (StringUtils.isNum(msg)) {
+                                            Main.CQ.logInfo("[Debug]", "输入为数字");
                                             int num = Integer.parseInt(msg);
                                             if (num > 0 && num <= game.getPlayers().size()) {
+                                                Main.CQ.logInfo("[Debug]", "范围内的数字");
                                                 PlayerData player = StringUtils.getPlayerByNum(num, game);
                                                 if (player == null) {
                                                     //虽然我觉得不大可能会是null
                                                     return;
                                                 }
-                                                if (Main.getGameManager().getTemp().equals(player)) {
-                                                    Main.getGameManager().setTemp(null);
+                                                Main.CQ.logInfo("[Debug]", "获取data");
+                                                if (defendedNum == num) {
+                                                    Main.CQ.sendPrivateMsg(fromQQ, "你守护过: " + num + " 号了");
+                                                    return;
                                                 }
-                                                Main.getGameManager().setTemp2(true);
+                                                if (Main.getGameManager().getWolfKilled() != null) {
+                                                    if (Main.getGameManager().getWolfKilled().getNum() == player.getNum()) {
+                                                        Main.getGameManager().setWolfKilled(null);
+                                                    }
+                                                }
+                                                defendedNum = num;
+                                                Main.getGameManager().setDefenderUsed(true);
                                                 Main.CQ.sendPrivateMsg(fromQQ, "你将守护的玩家: " + num + " 号");
                                             } else {
                                                 Main.CQ.sendPrivateMsg(fromQQ, "请输入一个正常的号码");
@@ -47,22 +61,26 @@ public class GameListener {
                             }
                             break;
                         case WOLFTALK:
-                            if (playerData.isDead()) {
-                                if (playerData.getVocation().equals(Vocation.WOLFKING)) {
-                                    if (Main.getGameManager().getWolfTalking().equals(playerData)) {
-                                        Main.getGameManager().sendWolfPrivateMessage(game, playerData, msg);
-                                    } else {
-                                        Main.CQ.sendPrivateMsg(fromQQ, "现在你不能说话，可能是因为现在还没轮到你或已经说过了");
+                            if (!playerData.isDead()) {
+                                if (playerData.getVocation().equals(Vocation.WOLF)) {
+                                    if (Main.getGameManager().getWolfTalking().getNum() == playerData.getNum()) {
+                                        if (!game.getWolfSaid().contains(playerData.getQq())) {
+                                            Main.getGameManager().sendWolfPrivateMessage(game, playerData, msg);
+                                            game.getWolfSaid().add(playerData.getQq());
+                                            Main.CQ.sendPrivateMsg(fromQQ, "已发送");
+                                        } else {
+                                            Main.CQ.sendPrivateMsg(fromQQ, "现在你不能说话，可能是因为现在还没轮到你或已经说过了");
+                                        }
                                     }
                                 }
                             }
 
                             break;
                         case WOLFSELECT:
-                            if (playerData.isDead()) {
-                                if (playerData.getVocation().equals(Vocation.WOLFKING)) {
+                            if (!playerData.isDead()) {
+                                if (playerData.getVocation().equals(Vocation.WOLF)) {
                                     if (StringUtils.isNum(msg)) {
-                                        if (Main.getGameManager().getVoted().contains(fromQQ)) {
+                                        if (!Main.getGameManager().getVoted().contains(fromQQ)) {
                                             int num = Integer.parseInt(msg);
                                             if (num > 0 && num <= game.getPlayers().size()) {
                                                 PlayerData player = StringUtils.getPlayerByNum(num, game);
@@ -88,54 +106,41 @@ public class GameListener {
                             }
                             break;
                         case WITCH:
-                            if (playerData.isDead()) {
+                            if (!playerData.isDead()) {
+                                Main.CQ.logInfo("[Debug]", "该玩家未死");
                                 if (playerData.getVocation().equals(Vocation.WITCH)) {
-                                    if (!Main.getGameManager().getTemp3()) {
-                                        if (Main.getGameManager().getTemp() != null && playerData.isPot1()) {
-                                            if (msg.split(" ")[0].equals("救")) {
-                                                String snum = msg.split(" ")[1];
-                                                if (StringUtils.isNum(snum)) {
-                                                    int num = Integer.parseInt(snum);
-                                                    if (num > 0 && num <= game.getPlayers().size()) {
-                                                        PlayerData player = StringUtils.getPlayerByNum(num, game);
-                                                        if (player == null) {
-                                                            //虽然我觉得不大可能会是null
-                                                            return;
-                                                        }
-                                                        if (player.equals(Main.getGameManager().getTemp())) {
-                                                            Main.getGameManager().setTemp(null);
-                                                        }
-                                                        Main.getGameManager().setTemp3(true);
-                                                    } else {
-                                                        Main.CQ.sendPrivateMsg(fromQQ, "请输入一个正常的号码");
-                                                    }
-                                                } else {
-                                                    Main.CQ.sendPrivateMsg(fromQQ, "请输入一个正常的号码");
-                                                }
+                                    Main.CQ.logInfo("[Debug]", "该玩家是女巫");
+                                    if (!Main.getGameManager().getWhichUsed()) {
+                                        Main.CQ.logInfo("[Debug]", "该玩家未操作过");
+                                        if (Main.getGameManager().getWolfKilled() != null && playerData.isPot1()) {
+                                            Main.CQ.logInfo("[Debug]", "未使用过毒药和有人死亡");
+                                            if (msg.equals("救")) {
+                                                Main.CQ.logInfo("[Debug]", "该玩家指令正确");
+                                                Main.getGameManager().setWolfKilled(null);
+                                                Main.CQ.sendGroupMsg(game.getGroup(), "成功！");
+                                                Main.getGameManager().setWhichUsed(true);
                                             }
-                                            break;
                                         }
-                                        if (playerData.isPot2()) {
-                                            if (msg.split(" ")[0].equals("毒")) {
-                                                String snum = msg.split(" ")[1];
-                                                if (StringUtils.isNum(snum)) {
-                                                    int num = Integer.parseInt(snum);
-                                                    if (num > 0 && num <= game.getPlayers().size()) {
-                                                        PlayerData player = StringUtils.getPlayerByNum(num, game);
-                                                        if (player == null) {
-                                                            //虽然我觉得不大可能会是null
-                                                            return;
-                                                        }
-                                                        if (!Main.getGameManager().getTemp().equals(player)) {
-                                                            Main.getGameManager().setTemp4(player);
-                                                        }
-                                                        Main.getGameManager().setTemp3(true);
-                                                    } else {
-                                                        Main.CQ.sendPrivateMsg(fromQQ, "请输入一个正常的号码");
-                                                    }
-                                                } else {
-                                                    Main.CQ.sendPrivateMsg(fromQQ, "请输入一个正常的号码");
+                                    }
+
+                                    if (playerData.isPot2()) {
+                                        Main.CQ.logInfo("[Debug]", "该玩家未使用过解药");
+                                        if (StringUtils.isNum(msg)) {
+                                            Main.CQ.logInfo("[Debug]", "该玩家输入为数字");
+                                            int num = Integer.parseInt(msg);
+                                            if (num > 0 && num <= game.getPlayers().size()) {
+                                                Main.CQ.logInfo("[Debug]", "该玩家数字输入范围正确");
+                                                PlayerData player = StringUtils.getPlayerByNum(num, game);
+                                                if (player == null) {
+                                                    //虽然我觉得不大可能会是null
+                                                    return;
                                                 }
+                                                Main.CQ.logInfo("[Debug]", "获取目标data");
+                                                if (Main.getGameManager().getWolfKilled().getNum() != player.getNum()) {
+                                                    Main.getGameManager().setWhichKilled(player);
+                                                }
+                                                Main.getGameManager().setWhichUsed(true);
+                                                Main.CQ.sendPrivateMsg(fromQQ, "成功");
                                             }
                                         }
                                     }
@@ -144,7 +149,7 @@ public class GameListener {
 
                             break;
                         case PROPHET:
-                            if (playerData.isDead()) {
+                            if (!playerData.isDead()) {
                                 if (playerData.getVocation().equals(Vocation.PROPHET)) {
                                     if (!Main.getGameManager().getTemp5()) {
                                         if (StringUtils.isNum(msg)) {
@@ -185,10 +190,12 @@ public class GameListener {
                             break;
                         case POLICE:
                             if (!playerData.isDead()) {
-                                if (msg.equals("过")) {
-                                    Main.getGameManager().setSayEnd(true);
+                                if (playerData.getNum() == Main.getGameManager().getSaying().getNum()) {
+                                    if (msg.equals("过")) {
+                                        Main.getGameManager().setSayEnd(true);
+                                    }
+                                    Main.CQ.sendGroupMsg(game.getGroup(), playerData.getNum() + "号玩家: " + msg);
                                 }
-                                Main.CQ.sendGroupMsg(game.getGroup(), playerData.getNum() + "号玩家: " + msg);
                             }
                             break;
                         case QUITPOLICE:
@@ -210,11 +217,9 @@ public class GameListener {
                                         if (Main.getGameManager().getVoted().contains(fromQQ)) {
                                             return;
                                         }
-                                        if (game.getVote().get(StringUtils.getPlayerByNum(num, game)) != null) {
                                             game.getVote().put(StringUtils.getPlayerByNum(num, game), game.getVote().get(StringUtils.getPlayerByNum(num, game)) + 1);
                                             Main.CQ.sendGroupMsg(fromQQ, "成功");
                                             Main.getGameManager().getVoted().add(fromQQ);
-                                        }
                                     }
                                 }
                             }

@@ -10,6 +10,21 @@ import lombok.Getter;
 
 import javax.swing.*;
 
+
+/*todo:
+已知bug:
+	警长选择发言之后没有后续
+	莫名其妙直接进入公投  然后出局
+	后续全乱
+
+警长1.5票还没写
+首夜 夜里死人的遗言还没写
+骑士 狼 自爆和刺的主动技能没写
+
+暂时就这么多
+ */
+
+
 /**
  * 本文件是JCQ插件的主类<br>
  * <br>
@@ -75,7 +90,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      */
     public String appInfo() {
         // 应用AppID,规则见 http://d.cqp.me/Pro/开发/基础信息#appid
-        String AppID = "com.example.demo";// 记住编译后的文件和json也要使用appid做文件名
+        String AppID = "cn.charlotte.wolfkills";// 记住编译后的文件和json也要使用appid做文件名
         /**
          * 本函数【禁止】处理其他任何代码，以免发生异常情况。
          * 如需执行初始化代码请在 startup 事件中执行（Type=1001）。

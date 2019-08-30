@@ -21,16 +21,17 @@ public class GameManager {
     @Setter
     private boolean sayEnd;
 
-    private List<Long> voted; //已投票狼人
-    private Map<Long, Integer> wolfVote;
-    private PlayerData temp; //8知道取什么名字帮我改一下 被狼人击杀的玩家
-    private boolean temp2; //守卫是否操作过了
-    private boolean temp3; //女巫是否操作过了
-    private PlayerData temp4; //女巫击杀的玩家'
+    private List<Long> voted = new ArrayList<>(); //已投票狼人
+    private Map<Long, Integer> wolfVote = new HashMap<>();
+    private PlayerData wolfKilled; //8知道取什么名字帮我改一下 被狼人击杀的玩家
+    private boolean defenderUsed; //守卫是否操作过了
+    private boolean whichUsed; //女巫是否操作过了
+    private PlayerData whichKilled; //女巫击杀的玩家'
     private boolean temp5; //预言家是否操作过了
     private boolean temp6;//猎人技能是否用过
-    private List<PlayerData> police;
+    private List<PlayerData> police = new ArrayList<>();
     private PlayerData voteByeBye;
+    private boolean end;
 
     //发送身份
     public void sendVocations(Game game) {
@@ -99,28 +100,28 @@ public class GameManager {
 
             switch (data.getVocation()) {
                 case VILLAGER:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【平民】\r\n技能: 你的观察能力就是你的技能，打破狼人的谎言，帮助好人阵营获得胜利！");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【平民】\r\n技能: 你的观察能力就是你的技能，打破狼人的谎言，帮助好人阵营获得胜利！");
                     break;
                 case WOLF:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【狼人】\r\n技能: 每晚能够击败一名玩家，击败场上所有的神或者民则获得胜利！私聊我【自爆】即可自爆而亡，直接进入下一轮天黑");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【狼人】\r\n技能: 每晚能够击败一名玩家，击败场上所有的神或者民则获得胜利！私聊我【自爆】即可自爆而亡，直接进入下一轮天黑");
                     break;
                 case PROPHET:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【预言家】\r\n技能: 每晚能够验证一名玩家是好人还是坏人，获得好人信任，用你的信息带领好人获胜！");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【预言家】\r\n技能: 每晚能够验证一名玩家是好人还是坏人，获得好人信任，用你的信息带领好人获胜！");
                     break;
                 case HUNTER:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【猎人】\r\n技能: 你死后可以带走场上任意一名活着的玩家，你也可以选择不开枪");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【猎人】\r\n技能: 你死后可以带走场上任意一名活着的玩家，你也可以选择不开枪");
                     break;
                 case BEAR:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【熊】\r\n技能: 早上如果你的上位或者下位有狼人时 你会咆哮，如果没有或者你已出局则不会咆哮");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【熊】\r\n技能: 早上如果你的上位或者下位有狼人时 你会咆哮，如果没有或者你已出局则不会咆哮");
                     break;
                 case WITCH:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【女巫】\r\n技能: 你有一瓶解药和毒药，解药可以防止一名玩家在夜里死去，毒药可以毒死一名玩家，呗毒死的玩家不可以发动技能或者被守卫守护");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【女巫】\r\n技能: 你有一瓶解药和毒药，解药可以防止一名玩家在夜里死去，毒药可以毒死一名玩家，被毒死的玩家不可以发动技能或者被守卫守护");
                     break;
                 case KNIGHT:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【骑士】\r\n技能: 你可以在白天任意时刻对我说【刺 ID】即可对他发起对决，如果该名玩家为狼人则你亮明身份，该狼出局，直接进入下一轮天黑，如果是好人，则你以死谢罪");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【骑士】\r\n技能: 你可以在白天任意时刻对我说【刺 ID】即可对他发起对决，如果该名玩家为狼人则你亮明身份，该狼出局，直接进入下一轮天黑，如果是好人，则你以死谢罪");
                     break;
                 case DEFENDER:
-                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀\r\n你的身份是【守卫】\r\n技能: 你可以在夜里守护一名玩家，该名玩家不会被狼人杀死，你不可以在两晚同时守护一名玩家");
+                    Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "你好，欢迎参加本场狼人杀  你是【" + data.getNum() + "】号\r\n你的身份是【守卫】\r\n技能: 你可以在夜里守护一名玩家，该名玩家不会被狼人杀死，你不可以在两晚同时守护一名玩家");
                     break;
                 case WOLFKING:
                     Main.CQ.sendPrivateMsg(game.getPlayers().get(i).getQq(), "NMSL");
@@ -158,6 +159,10 @@ public class GameManager {
         if (game.getStatus()!=GameStatus.WOLFSELECT){
             return;
         }
+        for (PlayerData data : game.getPlayers()) {
+            wolfVote.put(data.getQq(), 0);
+        }
+
 
         StringBuilder message = new StringBuilder();
         message.append("\r\n");
@@ -193,6 +198,8 @@ public class GameManager {
             e.printStackTrace();
         }
 
+        wolfKilled = voteByeByePlayer(game);
+
         game.setStatus(GameStatus.DEFENDER);
         defendChoosing(game);
         voted.clear();
@@ -202,6 +209,7 @@ public class GameManager {
         if (game.getStatus()!=GameStatus.DEFENDER){
             return;
         }
+        Main.CQ.sendGroupMsg(game.getGroup(), "守卫正在选择守护目标...");
 
         StringBuilder message = new StringBuilder();
         for (PlayerData player : game.getPlayers()) {
@@ -229,6 +237,7 @@ public class GameManager {
         if (game.getStatus()!=GameStatus.WITCH){
             return;
         }
+        Main.CQ.sendGroupMsg(game.getGroup(), "女巫正在行动...");
 
         StringBuilder message = new StringBuilder();
         for (PlayerData player : game.getPlayers()) {
@@ -238,7 +247,7 @@ public class GameManager {
             }
             message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
         }
-        message.append("昨晚，"+"这里需要被杀的变量"+"遇害，你 20s"); //缺少变量
+        message.append("昨晚，" + (wolfKilled == null ? "是平安夜" : wolfKilled.getNum() + "遇害，你可以发送【救】 20s")); //缺少变量
 
         for (PlayerData player : game.getPlayers()) {
             if (player.getVocation()==Vocation.WITCH&&!player.isDead()){
@@ -259,8 +268,10 @@ public class GameManager {
         if (game.getStatus()!=GameStatus.PROPHET){
             return;
         }
+        Main.CQ.sendGroupMsg(game.getGroup(), "预言家正在验人...");
         StringBuilder message = new StringBuilder();
-        for (PlayerData player : game.getPlayers()) {
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            PlayerData player = StringUtils.getPlayerByNum((i + 1), game);
             if (game.getNightNum()==1){
                 message.append(player.getNum()+". 首夜盲验");
                 continue;
@@ -268,6 +279,12 @@ public class GameManager {
             message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
         }
         message.append("你要验证身份的是？请直接回复序号 20s");
+        for (PlayerData alivePlayer : game.getAlivePlayers()) {
+            if (alivePlayer.getVocation() == Vocation.PROPHET) {
+                Main.CQ.sendPrivateMsg(alivePlayer.getQq(), message.toString());
+                break;
+            }
+        }
 
         try {
             sleep(20*1000);
@@ -308,9 +325,9 @@ public class GameManager {
             e.printStackTrace();
         }
 
-        StringBuilder msg = new StringBuilder();
         for (PlayerData data : police) {
-            msg.append("" + data.getNum() + "号开始发言");
+            Main.CQ.sendGroupMsg(game.getGroup(), "" + data.getNum() + "号开始发言 120s");
+            saying = data;
             int timer = 0;
             while (timer <= 120 && !sayEnd) {
                 timer--;
@@ -325,14 +342,10 @@ public class GameManager {
         game.setStatus(GameStatus.QUITPOLICE);
         quitPolice(game);
 
-
-
-
-
-
         Main.CQ.sendGroupMsg(game.getGroup(),message.toString());
     }
-    public void quitPolice(Game game){
+
+    private void quitPolice(Game game) {
         if (game.getStatus()!=GameStatus.QUITPOLICE){
             return;
         }
@@ -354,10 +367,20 @@ public class GameManager {
     }
 
     private void policeVoting(Game game){
+        Main.CQ.logInfo("[Debug]", "执行了policeVoting方法");
         if (game.getStatus()!=GameStatus.VOTEPOLICE){
+            return;
+        }
+        game.getVote().clear();
+        for (PlayerData data : police) {
+            game.getVote().put(data, 0);
+        }
+
             StringBuilder message = new StringBuilder();
             message.append("现在警上的玩家还剩\r\n");
-            message.append("警上list");
+        for (PlayerData data : police) {
+            message.append(data.getNum() + "号 ");
+        }
             message.append("\r\n请各位玩家投票 20s");
             Main.CQ.sendGroupMsg(game.getGroup(),message.toString());
             try{
@@ -378,6 +401,9 @@ public class GameManager {
                     num = entry.getValue();
                 }
                 if (entry.getValue() == num) {
+                    if (data.contains(entry.getKey())) {
+                        continue;
+                    }
                     data.add(entry.getKey());
                     num = entry.getValue();
                 }
@@ -388,54 +414,51 @@ public class GameManager {
                 game.setStatus(GameStatus.POLICE);
                 police = data;
                 this.police(game);
-                return;
+            } else {
+                Main.CQ.sendGroupMsg(game.getGroup(), data.get(0).getNum() + "号玩家当选警长！他有1.5票行使权");
+                game.setPolice(data.get(0));
+
+
+                game.setStatus(GameStatus.MORNING);
+                voted.clear();
+                morning(game);
             }
-            Main.CQ.sendGroupMsg(game.getGroup(), data.get(0).getNum() + "号玩家当选警长！他有1.5票行使权");
-            game.setPolice(data.get(0));
-
-
-            game.setStatus(GameStatus.MORNING);
-            voted.clear();
-            morning(game);
-        }
     }
     private void morning(Game game){
         StringBuilder message = new StringBuilder();
-        if (temp == null && temp4 == null) {
+        if (wolfKilled == null && whichKilled == null) {
             message.append("昨晚是平安夜，没有玩家死去");
-        } else if (temp == null || temp4 == null) {
-            message.append(temp == null ? "昨晚，" + temp4.getNum() + "号玩家死去" : "昨晚，" + temp.getNum() + "号玩家死去");
-            if (temp == null) {
-                useGun(game, temp4);
-                temp4.setDead(true);
+        } else if (wolfKilled == null || whichKilled == null) {
+            message.append(wolfKilled == null ? "昨晚，" + whichKilled.getNum() + "号玩家死去" : "昨晚，" + wolfKilled.getNum() + "号玩家死去");
+            if (wolfKilled == null) {
+                useGun(game, whichKilled);
+                whichKilled.setDead(true);
             } else {
-                useGun(game, temp);
-                temp.setDead(true);
+                useGun(game, wolfKilled);
+                wolfKilled.setDead(true);
             }
         } else {
-            if (temp.getNum() > temp4.getNum()) {
-                useGun(game, temp);
-                useGun(game, temp4);
-                temp.setDead(true);
-                temp4.setDead(true);
+            if (wolfKilled.getNum() > whichKilled.getNum()) {
+                useGun(game, wolfKilled);
+                useGun(game, whichKilled);
+                wolfKilled.setDead(true);
+                whichKilled.setDead(true);
 
-                message.append("昨晚，" + temp4.getNum() + "号 " + temp.getNum() + "号 玩家遇害");
+                message.append("昨晚，" + whichKilled.getNum() + "号 " + wolfKilled.getNum() + "号 玩家遇害");
             } else {
-                useGun(game, temp);
-                useGun(game, temp4);
-                message.append("昨晚，" + temp.getNum() + "号 " + temp4.getNum() + "号 玩家遇害");
+                useGun(game, wolfKilled);
+                useGun(game, whichKilled);
+                message.append("昨晚，" + wolfKilled.getNum() + "号 " + whichKilled.getNum() + "号 玩家遇害");
             }
         }
         if (isEnd(game)) {
             game.setEnd(true);
-            return;
         } else {
             game.setEnd(false);
         }
 
         if (isEnd(game)) {
             game.setEnd(true);
-            return;
         } else {
             game.setEnd(false);
         }
@@ -467,7 +490,7 @@ public class GameManager {
     }
 
     private void removePolice(Game game){
-        if ((temp != null && game.getPolice().getNum() == temp.getNum()) || (temp4 != null && game.getPolice().getNum() == temp4.getNum())) {
+        if ((wolfKilled != null && game.getPolice().getNum() == wolfKilled.getNum()) || (whichKilled != null && game.getPolice().getNum() == whichKilled.getNum())) {
             game.setStatus(GameStatus.SHAREPOLICE);
             Main.CQ.sendGroupMsg(game.getGroup(), "请私聊发送给我你想要给警徽的玩家编号，或者发送【撕】舍去警徽 20s");
             try {
@@ -561,7 +584,8 @@ public class GameManager {
         StringBuilder message = new StringBuilder();
 
         message.append("所有玩家发言完毕，现在是投票时间\r\n");
-        for (PlayerData player : game.getPlayers()) {
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            PlayerData player = StringUtils.getPlayerByNum((i + 1), game);
             message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
         }
         message.append("请私聊我需要以投票 20s");
@@ -591,6 +615,9 @@ public class GameManager {
                 iii = integer;
             }
             if (integer == iii) {
+                if (integers.contains(integer)) {
+                    continue;
+                }
                 integers.add(integer);
                 iii = integer;
             }
@@ -637,6 +664,7 @@ public class GameManager {
             }
         }
         sayEnd = false;
+        end = true;
 
     }
 
@@ -653,36 +681,36 @@ public class GameManager {
     }
 
 
-    public PlayerData getTemp() {
-        return temp;
+    public PlayerData getWolfKilled() {
+        return wolfKilled;
     }
 
-    public void setTemp(PlayerData temp) {
-        this.temp = temp;
+    public void setWolfKilled(PlayerData wolfKilled) {
+        this.wolfKilled = wolfKilled;
     }
 
-    public boolean getTemp2() {
-        return temp2;
+    public boolean getDefenderUsed() {
+        return defenderUsed;
     }
 
-    public void setTemp2(boolean temp2) {
-        this.temp2 = temp2;
+    public void setDefenderUsed(boolean defenderUsed) {
+        this.defenderUsed = defenderUsed;
     }
 
-    public boolean getTemp3() {
-        return temp3;
+    public boolean getWhichUsed() {
+        return whichUsed;
     }
 
-    public void setTemp3(boolean temp3) {
-        this.temp3 = temp3;
+    public void setWhichUsed(boolean whichUsed) {
+        this.whichUsed = whichUsed;
     }
 
-    public PlayerData getTemp4() {
-        return temp4;
+    public PlayerData getWhichKilled() {
+        return whichKilled;
     }
 
-    public void setTemp4(PlayerData temp4) {
-        this.temp4 = temp4;
+    public void setWhichKilled(PlayerData whichKilled) {
+        this.whichKilled = whichKilled;
     }
 
     public boolean getTemp5() {
@@ -697,7 +725,7 @@ public class GameManager {
         return police;
     }
 
-    private PlayerData tempfunc(Game game) { //8知道取什么名字帮我改一下
+    private PlayerData voteByeByePlayer(Game game) { //8知道取什么名字帮我改一下
         PlayerData temp = null;
         for (PlayerData playerData : game.getPlayers()) {
             if (wolfVote.containsKey(playerData.getQq())) {
@@ -715,8 +743,8 @@ public class GameManager {
 
     public void sendWolfPrivateMessage(Game game, PlayerData sender, String msg) {
         for (PlayerData wolf : game.getWolfTeam()) {
-            if (!wolf.equals(sender)) {
-                Main.CQ.sendPrivateMsg(wolf.getQq(), wolf.getNum() + "号玩家: " + msg);
+            if (wolf.getNum() != sender.getNum()) {
+                Main.CQ.sendPrivateMsg(wolf.getQq(), sender.getNum() + "号玩家: " + msg);
             }
         }
     }
