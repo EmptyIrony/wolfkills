@@ -544,7 +544,7 @@ public class GameManager {
         if (game.getStatus() != GameStatus.SAY) {
             return;
         }
-        while (said.size() >= game.getAlivePlayers().size()) {
+        while (said.size() <= game.getAlivePlayers().size()) {
             Main.CQ.sendGroupMsg(game.getGroup(), saying.getNum() + "号玩家请发言 120s 结束发言请输入【过】");
             int timer = 0;
             while (sayEnd || timer <= 120) {
@@ -747,6 +747,21 @@ public class GameManager {
                 Main.CQ.sendPrivateMsg(wolf.getQq(), sender.getNum() + "号玩家: " + msg);
             }
         }
+    }
+
+    public void boom(Game game, PlayerData data) {
+        data.setDead(true);
+        if (isEnd(game)) {
+            game.setEnd(true);
+            return;
+        } else {
+            game.setEnd(false);
+        }
+
+        Main.CQ.sendGroupMsg(game.getGroup(), data.getNum() + "号玩家自爆，直接进入下一轮天黑");
+        game.getAlivePlayers().remove(data);
+
+
     }
 
 }

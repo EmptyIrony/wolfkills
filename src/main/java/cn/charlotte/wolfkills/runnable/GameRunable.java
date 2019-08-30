@@ -59,19 +59,11 @@ public class GameRunable implements Runnable {
                     game.getWolfTeam().forEach(playerData -> {
                         message.append(playerData.getNum()+"号 ");
                     });
-                    message.append("\r\n接下来你们每人可以说一句话给狼同伴");
-                    Main.CQ.sendPrivateMsg(data.getQq(),message.toString());
                 }
             });
             Main.getGameManager().start(game);
             Main.CQ.logInfo("[Debug]", "完成一次循环");
-            while (!Main.getGameManager().isEnd()) {
-                try {
-                    sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+
         }
         StringBuilder message = new StringBuilder();
         message.append("游戏结束！");

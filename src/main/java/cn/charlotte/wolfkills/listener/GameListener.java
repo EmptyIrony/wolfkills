@@ -299,6 +299,15 @@ public class GameListener {
                             }
                             break;
                     }
+                    if (msg.equals("×Ô±¬")) {
+                        if (!playerData.isDead()) {
+                            if (game.getWolfTeam().contains(playerData)) {
+
+                            }
+                        }
+                    }
+
+
                     return;
                 }
             }
