@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="WolfKills">
-    <output-path>$PROJECT_DIR$/out/artifacts/WolfKills</output-path>
-    <root id="archive" name="WolfKills.jar">
-      <element id="module-output" name="WolfKills" />
-    </root>
-  </artifact>
-</component>
