@@ -120,6 +120,10 @@ public class GameManager {
     }
 
     public void wolfPrivate(Game game){
+        if (game.getStatus()!=GameStatus.WOLFTALK){
+            return;
+        }
+
         game.getWolfTeam().forEach(playerData -> {
             wolfTalking = playerData;
             Main.CQ.sendPrivateMsg(playerData.getQq(),"现在轮到你发言了，限时15s，一句话");
@@ -131,6 +135,10 @@ public class GameManager {
     }
 
     public void wolfVoting(Game game) {
+        if (game.getStatus()!=GameStatus.WOLFSELECT){
+            return;
+        }
+
         StringBuilder message = new StringBuilder();
         message.append("\r\n");
         for (PlayerData player : game.getPlayers()) {
@@ -149,28 +157,92 @@ public class GameManager {
        message.append("请直接回复序号进行投票 20s");
 
         game.getWolfTeam().forEach(playerData -> {
-            Main.CQ.sendPrivateMsg(playerData.getQq(),message.toString());
-            try {
-                sleep(500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (!playerData.isDead()) {
+                Main.CQ.sendPrivateMsg(playerData.getQq(), message.toString());
+                try {
+                    sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
+
         try {
             sleep(20*1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         game.setStatus(GameStatus.DEFENDER);
     }
 
     public void defendChoosing(Game game){
-        StringBuilder message = new StringBuilder();
-        for (PlayerData player : game.getPlayers()) {
-            if (player.getVocation()==Vocation.DEFENDER){
-                Main.CQ.sendPrivateMsg(player.getQq(),message.toString());
-            }
+        if (game.getStatus()!=GameStatus.DEFENDER){
+            return;
         }
 
+        StringBuilder message = new StringBuilder();
+        for (PlayerData player : game.getPlayers()) {
+            message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
+        }
+        message.append("请发送你要守护的人的序号，请注意你不可以连着两晚守护同一名玩家");
+        
+        for (PlayerData player : game.getPlayers()) {
+            if (player.getVocation()==Vocation.DEFENDER&&!player.isDead()){
+                Main.CQ.sendPrivateMsg(player.getQq(),message.toString());
+                break;
+            }
+        }
+        try {
+            sleep(20*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        game.setStatus(GameStatus.WITCH);
+    }
+
+    public void witchChoosing(Game game){
+        if (game.getStatus()!=GameStatus.WITCH){
+            return;
+        }
+
+        StringBuilder message = new StringBuilder();
+        for (PlayerData player : game.getPlayers()) {
+            if (game.getNightNum()==1){
+                message.append(player.getNum()+". 首夜盲毒");
+                continue;
+            }
+            message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
+        }
+        message.append("昨晚，"+"这里需要被杀的变量"+"遇害，你 20s"); //缺少变量
+
+        for (PlayerData player : game.getPlayers()) {
+            if (player.getVocation()==Vocation.WITCH&&!player.isDead()){
+                Main.CQ.sendPrivateMsg(player.getQq(),message.toString());
+                break;
+            }
+        }
+        try {
+            sleep(20*1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        game.setStatus(GameStatus.PROPHET);
+    }
+
+    public void prophetChoosing(Game game){
+        if (game.getStatus()!=GameStatus.PROPHET){
+            return;
+        }
+        StringBuilder message = new StringBuilder();
+        for (PlayerData player : game.getPlayers()) {
+            if (game.getNightNum()==1){
+                message.append(player.getNum()+". 首夜盲验");
+                continue;
+            }
+            message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
+        }
+        message.append("你要验证身份的是？请直接回复序号 20s");
     }
 }
