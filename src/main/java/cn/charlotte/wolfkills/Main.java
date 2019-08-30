@@ -1,9 +1,11 @@
 package cn.charlotte.wolfkills;
 
+import cn.charlotte.wolfkills.manager.GameManager;
 import cn.charlotte.wolfkills.manager.MessageManager;
 import cn.charlotte.wolfkills.manager.PlayerManager;
 import com.sobte.cqp.jcq.entity.*;
 import com.sobte.cqp.jcq.event.JcqAppAbstract;
+import lombok.Getter;
 
 import javax.swing.*;
 
@@ -22,6 +24,8 @@ import javax.swing.*;
 public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
     private static MessageManager messageManager;
     private static PlayerManager playerManager;
+    @Getter
+    private static GameManager gameManager;
 
     /**
      * 用main方法调试可以最大化的加快开发效率，检测和定位错误位置<br/>
@@ -38,7 +42,6 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         // 下面对主类进行各方法测试,按照JCQ运行过程，模拟实际情况
         main.startup();// 程序运行开始 调用应用初始化方法
         main.enable();// 程序初始化完成后，启用应用，让应用正常工作
-        registerManagers();
         // 开始模拟发送消息
         // 模拟私聊消息
         // 开始模拟QQ用户发送消息，以下QQ全部编造，请勿添加
@@ -54,6 +57,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
     private static void registerManagers(){
         messageManager = new MessageManager();
         playerManager = new PlayerManager();
+        gameManager = new GameManager();
     }
 
     public static PlayerManager getPlayerManager() {
@@ -111,6 +115,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      * @return 请固定返回0。
      */
     public int enable() {
+        registerManagers();
         enable = true;
         return 0;
     }
