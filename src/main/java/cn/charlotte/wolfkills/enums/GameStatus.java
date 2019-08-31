@@ -15,7 +15,10 @@ public enum GameStatus {
     VOTEPOLICE, // 选择警长
     MORNING, //天亮 公布信息
     CHOSINGSAY, // 选择发言顺序
+    SHAREPOLICE,//警徽传递
+    BIU,//猎人开枪
     SAY, //发言
+    DEATHSAY,
     VOTE, //公投
     END, //结束
 }

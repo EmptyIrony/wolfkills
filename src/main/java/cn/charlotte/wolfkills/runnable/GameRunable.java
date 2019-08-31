@@ -3,8 +3,6 @@
 import cn.charlotte.wolfkills.Main;
 import cn.charlotte.wolfkills.data.Game;
 import cn.charlotte.wolfkills.enums.GameStatus;
-import cn.charlotte.wolfkills.enums.Vocation;
-import cn.charlotte.wolfkills.manager.GameManager;
 
 import java.util.Collections;
 
@@ -40,6 +38,7 @@ public class GameRunable implements Runnable {
         //开始游戏代码段
         Main.CQ.sendGroupMsg(game.getGroup(),"游戏即将开始！正在进行初始化...");
         Collections.shuffle(game.getPlayers());
+        game.setAlivePlayers(game.getPlayers());
         game.setStatus(GameStatus.STARTING);
         Main.getGameManager().sendVocations(game);
         try{
@@ -60,19 +59,21 @@ public class GameRunable implements Runnable {
                     game.getWolfTeam().forEach(playerData -> {
                         message.append(playerData.getNum()+"号 ");
                     });
-                    message.append("\r\n接下来你们每人可以说一句话给狼同伴");
-                    Main.CQ.sendPrivateMsg(data.getQq(),message.toString());
                 }
             });
-            Main.getGameManager().wolfPrivate(game);
-
-            Main.getGameManager().wolfVoting(game);
-
-
-
-
-
+            Main.getGameManager().start(game);
+            Main.CQ.logInfo("[Debug]", "完成一次循环");
 
         }
+        StringBuilder message = new StringBuilder();
+        message.append("游戏结束！");
+        if (game.getWinner().equalsIgnoreCase("wolf")) {
+            message.append("狼人获胜！");
+        } else {
+            message.append("好人获胜！");
+        }
+
+        Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
+        Main.getMysql().settlement(game);
 }
 }

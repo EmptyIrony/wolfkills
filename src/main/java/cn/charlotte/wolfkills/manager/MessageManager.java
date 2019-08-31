@@ -1,5 +1,6 @@
 package cn.charlotte.wolfkills.manager;
 
+import cn.charlotte.wolfkills.listener.GameListener;
 import cn.charlotte.wolfkills.listener.PreStartListener;
 import com.sobte.cqp.jcq.entity.IMsg;
 
@@ -20,7 +21,7 @@ public class MessageManager {
      */
 
     public void onPrivateMsg(int subType, int msgId, long fromQQ, String msg, int font) {
-
+        GameListener.onPrivateMsg(subType, msgId, fromQQ, msg, font);
 
     }
 
