@@ -19,8 +19,8 @@ import java.util.concurrent.ScheduledExecutorService;
 	警长选择发言之后没有后续
 	莫名其妙直接进入公投  然后出局
 	后续全乱
+	守卫卡在 该玩家未死
 
-警长1.5票还没写
 首夜 夜里死人的遗言还没写
 骑士 狼 自爆和刺的主动技能没写
 

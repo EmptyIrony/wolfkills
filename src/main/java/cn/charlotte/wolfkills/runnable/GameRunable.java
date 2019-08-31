@@ -3,8 +3,8 @@ package cn.charlotte.wolfkills.runnable;
 import cn.charlotte.wolfkills.Main;
 import cn.charlotte.wolfkills.data.Game;
 import cn.charlotte.wolfkills.enums.GameStatus;
-
-import java.util.Collections;
+import cn.charlotte.wolfkills.manager.GameManager;
+import lombok.Getter;
 
 import static java.lang.Thread.sleep;
 
@@ -12,10 +12,14 @@ public class GameRunable implements Runnable {
 
     private int timer;
     private Game game;
+    @Getter
+    private GameManager gameManager;
 
     public GameRunable(Game game) {
         this.timer = 60;
         this.game = game;
+        gameManager = Main.getGameManager();
+        Main.getGameManager().setGame(game);
     }
 
 
@@ -39,7 +43,7 @@ public class GameRunable implements Runnable {
         Main.CQ.sendGroupMsg(game.getGroup(), "游戏即将开始！正在进行初始化...");
         game.setAlivePlayers(game.getPlayers());
         game.setStatus(GameStatus.STARTING);
-        Main.getGameManager().sendVocations(game);
+        gameManager.sendVocations(game);
         try {
             sleep(3 * 1000);
         } catch (Exception ignored) {
@@ -61,7 +65,15 @@ public class GameRunable implements Runnable {
                     });
                 }
             });
-            Main.getGameManager().start(game);
+            Thread thread = new Thread(gameManager);
+            thread.start();
+            while (!gameManager.isForceStop()) {
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
             Main.CQ.logInfo("[Debug]", "完成一次循环");
 
         }

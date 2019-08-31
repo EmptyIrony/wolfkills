@@ -15,13 +15,17 @@ import java.util.*;
 import static java.lang.Thread.sleep;
 
 @Getter
-public class GameManager {
+public class GameManager implements Runnable {
     private PlayerData wolfTalking;
+    @Setter
+    private Game game;
     @Setter
     private PlayerData saying;
     private List<PlayerData> said = new ArrayList<>();
     @Setter
     private boolean sayEnd;
+    @Setter
+    private boolean forceStop;
 
     private List<Long> voted = new ArrayList<>(); //已投票狼人
     private Map<Long, Integer> wolfVote = new HashMap<>();
@@ -34,6 +38,11 @@ public class GameManager {
     private List<PlayerData> police = new ArrayList<>();
     private PlayerData voteByeBye;
     private boolean end;
+
+    @Override
+    public void run() {
+        start(this.game);
+    }
 
     //发送身份
     public void sendVocations(Game game) {
@@ -96,7 +105,8 @@ public class GameManager {
 
         Collections.shuffle(vocations);
 
-        Main.getInstance().getExecutorPool().execute(new SpreadStatusRunnable(game, vocations));
+        //Main.getInstance().getExecutorPool().execute(new SpreadStatusRunnable(game, vocations));
+        new SpreadStatusRunnable(game, vocations).run();
     }
 
     public void start(Game game) {
@@ -252,6 +262,16 @@ public class GameManager {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        StringBuilder p = new StringBuilder();
+        for (int i = 0; i < game.getPlayers().size(); i++) {
+            for (Map.Entry<Long, PlayerData> entry : game.getPlayers().entrySet()) {
+                if ((i + 1) == entry.getValue().getNum()) {
+                    message.append(entry.getValue().getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), entry.getValue().getQq()).getNick() + (entry.getValue().isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
+                }
+            }
+        }
+
+        Main.CQ.sendGroupMsg(game.getGroup(), p.toString());
 
         if (game.getNightNum() == 1) {
             game.setStatus(GameStatus.PREPOLICE);
@@ -259,13 +279,14 @@ public class GameManager {
         } else {
             game.setStatus(GameStatus.MORNING);
             morning(game);
+
         }
     }
 
     private void prePolice(Game game) {
-        Main.CQ.sendGroupMsg(game.getGroup(), "天亮了，现在开始警长竞选环节\r\n想要参加竞选的玩家可以私聊发送给我【上警】 20s");
+        Main.CQ.sendGroupMsg(game.getGroup(), "天亮了，现在开始警长竞选环节\r\n想要参加竞选的玩家可以私聊发送给我【上警】 30s");
         try {
-            sleep(20 * 1000);
+            sleep(30 * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -279,7 +300,12 @@ public class GameManager {
         for (PlayerData data : police) {
             message.append(data.getNum() + "号");
         }
-        Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
+        if (police.isEmpty()) {
+            Main.CQ.sendGroupMsg(game.getGroup(), "无人上警");
+            game.setStatus(GameStatus.MORNING);
+            morning(game);
+        } else
+            Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
         try {
             sleep(3 * 1000);
         } catch (InterruptedException e) {
@@ -292,6 +318,7 @@ public class GameManager {
             int timer = 0;
             while (timer <= 120 && !sayEnd) {
                 timer--;
+                Main.CQ.logInfo("[DeBug]", "发言计时器正在工作");
                 try {
                     sleep(1000);
                 } catch (Exception ignored) {
@@ -311,9 +338,7 @@ public class GameManager {
             return;
         }
 
-        StringBuilder message = new StringBuilder();
-        message.append("发言完毕，想要退出竞选的玩家请私聊机器人【退水】 20s");
-        Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
+        Main.CQ.sendGroupMsg(game.getGroup(), "发言完毕，想要退出竞选的玩家请私聊机器人【退水】 20s");
         try {
             sleep(20 * 1000);
         } catch (InterruptedException e) {
@@ -340,7 +365,7 @@ public class GameManager {
         StringBuilder message = new StringBuilder();
         message.append("现在警上的玩家还剩\r\n");
         for (PlayerData data : police) {
-            message.append(data.getNum() + "号 ");
+            message.append(data.getNum()).append("号 ");
         }
         message.append("\r\n请各位玩家投票 20s");
         Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
@@ -406,11 +431,11 @@ public class GameManager {
                 wolfKilled.setDead(true);
                 whichKilled.setDead(true);
 
-                message.append("昨晚，" + whichKilled.getNum() + "号 " + wolfKilled.getNum() + "号 玩家遇害");
+                message.append("昨晚，").append(whichKilled.getNum()).append("号 ").append(wolfKilled.getNum()).append("号 玩家遇害");
             } else {
                 useGun(game, wolfKilled);
                 useGun(game, whichKilled);
-                message.append("昨晚，" + wolfKilled.getNum() + "号 " + whichKilled.getNum() + "号 玩家遇害");
+                message.append("昨晚，").append(wolfKilled.getNum()).append("号 ").append(whichKilled.getNum()).append("号 玩家遇害");
             }
         }
         if (isEnd(game)) {
@@ -425,10 +450,23 @@ public class GameManager {
             game.setEnd(false);
         }
         removePolice(game);
-        if (game.getNightNum() == 1) {
-            message.append("" + "号，请说遗言 120s 结束发言请输入【过】");
+        if (game.getNightNum() == 1 && (wolfKilled != null || whichKilled != null)) {
+            message.append("请说遗言 120s 结束发言请输入【过】");
             game.setStatus(GameStatus.DEATHSAY);
             Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
+            sayEnd = false;
+            saying = wolfKilled;
+            int timer = 0;
+            while (!sayEnd && timer <= 120) {
+                timer++;
+                try {
+                    sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            saying = null;
+            sayEnd = false;
 
         }
         StringBuilder msg = new StringBuilder();
@@ -442,8 +480,8 @@ public class GameManager {
                 e.printStackTrace();
             }
         } else {
-            PlayerData say = game.getAlivePlayers().get(new Random().nextInt(game.getAlivePlayers().size()));
-            msg.append("没有警长，随机从" + say.getNum() + "号开始发言");
+            PlayerData say = game.getAlivePlayers().get(StringUtils.getPlayerByNum(new Random().nextInt(game.getAlivePlayers().size()), game).getQq());
+            msg.append("没有警长，随机从").append(say.getNum()).append("号开始发言");
             saying = say;
             Main.CQ.sendGroupMsg(game.getGroup(), msg.toString());
         }
@@ -509,13 +547,14 @@ public class GameManager {
         while (said.size() <= game.getAlivePlayers().size()) {
             Main.CQ.sendGroupMsg(game.getGroup(), saying.getNum() + "号玩家请发言 120s 结束发言请输入【过】");
             int timer = 0;
-            while (sayEnd || timer <= 120) {
+            while (!sayEnd && timer <= 120) {
                 timer++;
                 try {
                     sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                Main.CQ.logInfo("[DeBug]", "计时器正在工作");
             }
             said.add(saying);
             sayEnd = false;
@@ -525,15 +564,21 @@ public class GameManager {
             if (num > game.getPlayers().size()) {
                 num = 1;
             }
-            while (!game.getPlayers().get(num).isDead()) {
+            while (!game.getPlayers().get(StringUtils.getPlayerByNum(num, game).getQq()).isDead()) {
                 num = num + 1;
                 if (num > game.getPlayers().size()) {
                     num = 1;
                 }
             }
 
-            saying = game.getPlayers().get(num);
+            for (Map.Entry<Long, PlayerData> longPlayerDataEntry : game.getPlayers().entrySet()) {
+                if (longPlayerDataEntry.getValue().getNum() == num) {
+                    saying = longPlayerDataEntry.getValue();
+                    break;
+                }
+            }
         }
+        said.clear();
         game.setStatus(GameStatus.VOTE);
         vote(game);
         game.getVote().clear();
@@ -548,7 +593,7 @@ public class GameManager {
         message.append("所有玩家发言完毕，现在是投票时间\r\n");
         for (int i = 0; i < game.getPlayers().size(); i++) {
             PlayerData player = StringUtils.getPlayerByNum((i + 1), game);
-            message.append(player.getNum() + ". " + Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick() + (player.isDead() ? Main.CC.emoji(128128) : "") + "\r\n");
+            message.append(player.getNum()).append(". ").append(Main.CQ.getGroupMemberInfoV2(game.getGroup(), player.getQq()).getNick()).append(player.isDead() ? Main.CC.emoji(128128) : "").append("\r\n");
         }
         message.append("请私聊我需要以投票 20s");
         try {
@@ -562,9 +607,13 @@ public class GameManager {
         StringBuilder vote = new StringBuilder();
 
         for (Map.Entry<PlayerData, Integer> entry : game.getVote().entrySet()) {
-            vote.append(entry.getKey() + "号 -> " + entry.getValue());
+            vote.append(entry.getKey().getNum()).append("号 -> ").append(entry.getValue());
+            if (entry.getKey().getNum() == game.getPolice().getNum()) {
+                nums.add(entry.getValue());
+            }
             nums.add(entry.getValue());
         }
+
         List<Integer> integers = new ArrayList<>();
         int iii = 0;
         for (Integer integer : nums) {
@@ -584,9 +633,13 @@ public class GameManager {
                 iii = integer;
             }
         }
+
+
         Main.CQ.sendGroupMsg(game.getGroup(), vote.toString());
 
         if (integers.size() >= 2) {
+
+
             Main.CQ.sendGroupMsg(game.getGroup(), "平票！进入第二轮发言");
             game.setStatus(GameStatus.SAY);
             this.say(game);
@@ -605,12 +658,12 @@ public class GameManager {
     }
 
     private void voteEnd(Game game) {
-        StringBuilder message = new StringBuilder();
-        message.append(voteByeBye.getNum() + "号被公投出局\r\n号 请说遗言 120秒 可以使用【过】");
-        Main.CQ.sendGroupMsg(game.getGroup(), message.toString());
+        Main.CQ.sendGroupMsg(game.getGroup(), voteByeBye.getNum() + "号被公投出局\r\n号 请说遗言 120秒 可以使用【过】");
         game.setStatus(GameStatus.DEATHSAY);
         useGun(game, voteByeBye);
         removePolice(game);
+        StringUtils.getPlayerByNum(voteByeBye.getNum(), game).setDead(true);
+        game.getAlivePlayers().remove(StringUtils.getPlayerByNum(voteByeBye.getNum(), game).getQq());
         if (isEnd(game)) {
             game.setEnd(true);
             return;
@@ -618,7 +671,7 @@ public class GameManager {
             game.setEnd(false);
         }
         int timer = 0;
-        while (sayEnd || timer <= 120) {
+        while (!sayEnd && timer <= 120) {
             timer++;
             try {
                 sleep(120 * 1000);
@@ -721,7 +774,7 @@ public class GameManager {
         }
 
         Main.CQ.sendGroupMsg(game.getGroup(), data.getNum() + "号玩家自爆，直接进入下一轮天黑");
-        game.getAlivePlayers().remove(data);
+        game.getAlivePlayers().remove(data.getQq());
 
 
     }

@@ -4,12 +4,14 @@ import cn.charlotte.wolfkills.Main;
 import cn.charlotte.wolfkills.data.Game;
 import cn.charlotte.wolfkills.data.PlayerData;
 import cn.charlotte.wolfkills.runnable.GameRunable;
+import lombok.Getter;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 public class PlayerManager {
+    @Getter
     private Map<Long, Thread> runnableMap = new HashMap<>();
 
     public void addPlayer(long qq, Game game) {

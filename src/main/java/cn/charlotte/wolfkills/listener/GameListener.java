@@ -2,6 +2,7 @@ package cn.charlotte.wolfkills.listener;
 
 import cn.charlotte.wolfkills.Main;
 import cn.charlotte.wolfkills.data.PlayerData;
+import cn.charlotte.wolfkills.enums.GameStatus;
 import cn.charlotte.wolfkills.enums.Vocation;
 import cn.charlotte.wolfkills.util.StringUtils;
 
@@ -16,14 +17,18 @@ public class GameListener {
         Set<Map.Entry<Long, cn.charlotte.wolfkills.data.Game>> entrySet = cn.charlotte.wolfkills.data.Game.gameMap.entrySet();
         for (Map.Entry<Long, cn.charlotte.wolfkills.data.Game> map : entrySet) {
             cn.charlotte.wolfkills.data.Game game = map.getValue();
+            if (game.getStatus() == GameStatus.WAITING || game.getStatus() == GameStatus.STARTING) {
+                return;
+            }
+
             for (int i = 0; i < game.getPlayers().size(); i++) {
-                PlayerData playerData = game.getPlayers().get(i);
+                PlayerData playerData = game.getPlayers().get(fromQQ);
                 if (playerData.getQq() == fromQQ) {
                     switch (game.getStatus()) {
                         case DEFENDER:
                             if (!playerData.isDead()) {
                                 Main.CQ.logInfo("[Debug]", "该玩家未死");
-                                if (playerData.getVocation().equals(Vocation.DEFENDER)) {
+                                if (playerData.getVocation() == Vocation.DEFENDER) {
                                     Main.CQ.logInfo("[Debug]", "该玩家为守卫");
                                     if (!Main.getGameManager().getDefenderUsed()) {
                                         Main.CQ.logInfo("[Debug]", "该玩家守卫未使用");
@@ -112,18 +117,19 @@ public class GameListener {
                                     Main.CQ.logInfo("[Debug]", "该玩家是女巫");
                                     if (!Main.getGameManager().getWhichUsed()) {
                                         Main.CQ.logInfo("[Debug]", "该玩家未操作过");
-                                        if (Main.getGameManager().getWolfKilled() != null && playerData.isPot1()) {
+                                        if (Main.getGameManager().getWolfKilled() != null && !playerData.isPot1()) {
                                             Main.CQ.logInfo("[Debug]", "未使用过毒药和有人死亡");
                                             if (msg.equals("救")) {
                                                 Main.CQ.logInfo("[Debug]", "该玩家指令正确");
                                                 Main.getGameManager().setWolfKilled(null);
-                                                Main.CQ.sendGroupMsg(game.getGroup(), "成功！");
+                                                Main.CQ.sendPrivateMsg(playerData.getQq(), "成功！");
                                                 Main.getGameManager().setWhichUsed(true);
+                                                playerData.setPot1(true);
                                             }
                                         }
                                     }
 
-                                    if (playerData.isPot2()) {
+                                    if (!playerData.isPot2()) {
                                         Main.CQ.logInfo("[Debug]", "该玩家未使用过解药");
                                         if (StringUtils.isNum(msg)) {
                                             Main.CQ.logInfo("[Debug]", "该玩家输入为数字");
@@ -141,6 +147,7 @@ public class GameListener {
                                                 }
                                                 Main.getGameManager().setWhichUsed(true);
                                                 Main.CQ.sendPrivateMsg(fromQQ, "成功");
+                                                playerData.setPot2(true);
                                             }
                                         }
                                     }
@@ -218,7 +225,7 @@ public class GameListener {
                                             return;
                                         }
                                         game.getVote().put(StringUtils.getPlayerByNum(num, game), game.getVote().get(StringUtils.getPlayerByNum(num, game)) + 1);
-                                        Main.CQ.sendGroupMsg(fromQQ, "成功");
+                                        Main.CQ.sendPrivateMsg(fromQQ, "成功");
                                         Main.getGameManager().getVoted().add(fromQQ);
                                     }
                                 }
@@ -302,7 +309,7 @@ public class GameListener {
                     if (msg.equals("自爆")) {
                         if (!playerData.isDead()) {
                             if (game.getWolfTeam().containsValue(playerData)) {
-
+                                Main.getGameManager().boom(game, playerData);
                             }
                         }
                     }
