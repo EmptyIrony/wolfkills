@@ -14,7 +14,7 @@ public class StringUtils {
     }
 
     public static PlayerData getPlayerByNum(int num, Game game) {
-        for (PlayerData playerData : game.getPlayers()) {
+        for (PlayerData playerData : game.getPlayers().values()) {
             if (playerData.getNum() == num) {
                 return playerData;
             }

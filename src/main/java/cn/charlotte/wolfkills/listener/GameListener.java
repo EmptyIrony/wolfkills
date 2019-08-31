@@ -161,7 +161,7 @@ public class GameListener {
                                                     return;
                                                 }
                                                 Main.getGameManager().setTemp5(true);
-                                                if (game.getWolfTeam().contains(player)) {
+                                                if (game.getWolfTeam().containsValue(player)) {
                                                     Main.CQ.sendPrivateMsg(fromQQ, num + " 号玩家身份: 狼人");
                                                 } else {
                                                     Main.CQ.sendPrivateMsg(fromQQ, num + " 号玩家身份: 好人");
@@ -217,9 +217,9 @@ public class GameListener {
                                         if (Main.getGameManager().getVoted().contains(fromQQ)) {
                                             return;
                                         }
-                                            game.getVote().put(StringUtils.getPlayerByNum(num, game), game.getVote().get(StringUtils.getPlayerByNum(num, game)) + 1);
-                                            Main.CQ.sendGroupMsg(fromQQ, "成功");
-                                            Main.getGameManager().getVoted().add(fromQQ);
+                                        game.getVote().put(StringUtils.getPlayerByNum(num, game), game.getVote().get(StringUtils.getPlayerByNum(num, game)) + 1);
+                                        Main.CQ.sendGroupMsg(fromQQ, "成功");
+                                        Main.getGameManager().getVoted().add(fromQQ);
                                     }
                                 }
                             }
@@ -301,7 +301,7 @@ public class GameListener {
                     }
                     if (msg.equals("自爆")) {
                         if (!playerData.isDead()) {
-                            if (game.getWolfTeam().contains(playerData)) {
+                            if (game.getWolfTeam().containsValue(playerData)) {
 
                             }
                         }

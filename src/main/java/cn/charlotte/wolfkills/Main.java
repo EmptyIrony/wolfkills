@@ -9,6 +9,9 @@ import com.sobte.cqp.jcq.event.JcqAppAbstract;
 import lombok.Getter;
 
 import javax.swing.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 
 /*todo:
@@ -40,10 +43,17 @@ import javax.swing.*;
 public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
     private static MessageManager messageManager;
     private static PlayerManager playerManager;
+
+    @Getter
+    private static Main instance;
     @Getter
     private static GameManager gameManager;
     @Getter
     private static MysqlManager mysql;
+    @Getter
+    private ExecutorService gamePool = Executors.newCachedThreadPool();
+    @Getter
+    private ScheduledExecutorService executorPool = Executors.newScheduledThreadPool(16);
 
     /**
      * 用main方法调试可以最大化的加快开发效率，检测和定位错误位置<br/>
@@ -57,6 +67,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         CQ.logInfo("[JCQ] WolfKills", "启动");// 现在就可以用CQ变量来执行任何想要的操作了
         // 要测试主类就先实例化一个主类对象
         Main main = new Main();
+        instance = main;
         // 下面对主类进行各方法测试,按照JCQ运行过程，模拟实际情况
         main.startup();// 程序运行开始 调用应用初始化方法
         main.enable();// 程序初始化完成后，启用应用，让应用正常工作
@@ -72,7 +83,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         main.exit();// 最后程序运行结束，调用exit方法
     }
 
-    private static void registerManagers(){
+    private static void registerManagers() {
         messageManager = new MessageManager();
         playerManager = new PlayerManager();
         gameManager = new GameManager();
@@ -168,7 +179,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
      */
     public int privateMsg(int subType, int msgId, long fromQQ, String msg, int font) {
         // 这里处理消息
-        messageManager.onPrivateMsg(subType,msgId,fromQQ,msg,font);
+        messageManager.onPrivateMsg(subType, msgId, fromQQ, msg, font);
         return MSG_IGNORE;
     }
 
@@ -201,7 +212,7 @@ public class Main extends JcqAppAbstract implements ICQVer, IMsg, IRequest {
         //List<CQImage> images = CC.getCQImages(msg);// 此方法为获取消息中所有的CQ图片数据，错误时打印异常到控制台，返回 已解析的数据
 
         // 这里处理消息
-        messageManager.onGroupMsg(subType,msgId,fromGroup,fromQQ,fromAnonymous,msg,font);
+        messageManager.onGroupMsg(subType, msgId, fromGroup, fromQQ, fromAnonymous, msg, font);
         return MSG_IGNORE;
     }
 

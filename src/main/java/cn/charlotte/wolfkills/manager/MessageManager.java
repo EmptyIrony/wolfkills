@@ -39,6 +39,6 @@ public class MessageManager {
      */
 
     public void onGroupMsg(int subType, int msgId, long fromGroup, long fromQQ, String fromAnonymous, String msg, int font) {
-        PreStartListener.onGroupMsg(subType,msgId,fromGroup,fromQQ,fromAnonymous,msg,font);
+        //PreStartListener.onGroupMsg(subType, msgId, fromGroup, fromQQ, fromAnonymous, msg, font);
     }
 }

@@ -37,7 +37,7 @@ public class MysqlManager {
 
     public void settlement(Game game) {
         if (game.getWinner().equalsIgnoreCase("human")) {
-            for (PlayerData data : game.getHumanTeam()) {
+            for (PlayerData data : game.getHumanTeam().values()) {
                 if (isExits(data.getQq())) {
                     try {
                         PreparedStatement ps = conn.prepareStatement("UPDATE WolfKills SET humanwins=? where QQ=?;");
@@ -61,7 +61,7 @@ public class MysqlManager {
                 }
             }
         } else {
-            for (PlayerData data : game.getWolfTeam()) {
+            for (PlayerData data : game.getWolfTeam().values()) {
                 if (isExits(data.getQq())) {
                     try {
                         PreparedStatement ps = conn.prepareStatement("UPDATE WolfKills SET wolfwins=? where QQ=?;");
